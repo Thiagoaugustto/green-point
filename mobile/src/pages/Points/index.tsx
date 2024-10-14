@@ -7,6 +7,22 @@ import MapView, { Marker } from 'react-native-maps';
 import { SvgUri } from 'react-native-svg';
 import * as Location from 'expo-location';
 import api from '../../services/api';
+import { StackNavigationProp } from '@react-navigation/stack';
+
+type RootStackParamList = {
+  Detail: { 
+    point_id: number;
+  };
+};
+
+type PointsScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'Detail'
+>;
+
+type Props = {
+  navigation: PointsScreenNavigationProp;
+};
 
 interface Item {
   id: number;
@@ -35,14 +51,14 @@ const Points = () => {
 
   const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0]);
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute();
 
   const routeParams = route.params as Params;
 
   useEffect(() => {
     async function loadPosition() {
-      const { status } = await Location.requestPermissionsAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
 
       if (status !== 'granted') {
         Alert.alert('Oooops...', 'Precisamos de sua permissão para obter a localização');
@@ -52,8 +68,6 @@ const Points = () => {
       const location = await Location.getCurrentPositionAsync();
 
       const { latitude, longitude } = location.coords;
-
-      console.log(latitude, longitude);
 
       setInitialPosition([
         latitude,

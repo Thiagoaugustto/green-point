@@ -3,12 +3,29 @@ import { Feather as Icon } from '@expo/vector-icons';
 import { View, ImageBackground, Text, Image, StyleSheet, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+
+type RootStackParamList = {
+  Points: { 
+    uf: string; 
+    city: string 
+  };
+};
+
+type PointsScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'Points'
+>;
+
+type Props = {
+  navigation: PointsScreenNavigationProp;
+};
 
 const Home = () => {
   const [uf, setUf] = useState('');
   const [city, setCity] = useState('');
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   function handleNavigateToPoints() {
     navigation.navigate('Points', {

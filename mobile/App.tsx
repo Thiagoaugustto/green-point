@@ -1,5 +1,6 @@
 import React from 'react';
-import { AppLoading } from 'expo';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 
 import { Roboto_400Regular, Roboto_500Medium } from '@expo-google-fonts/roboto';
@@ -14,8 +15,15 @@ export default function App() {
     Ubuntu_700Bold
   });
 
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
   if (!fontsLoaded) {
-    return <AppLoading />
+    SplashScreen.preventAutoHideAsync();
+    return null;
   }
 
   return (
