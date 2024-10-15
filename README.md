@@ -1,1 +1,1 @@
-# EcoMap
+# Green Point
