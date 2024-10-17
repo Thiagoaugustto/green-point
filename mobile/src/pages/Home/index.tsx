@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Feather as Icon } from '@expo/vector-icons';
 import { View, ImageBackground, Text, Image, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { RectButton } from 'react-native-gesture-handler';
@@ -13,6 +12,7 @@ type RootStackParamList = {
     uf: string; 
     city: string 
   };
+  CreatePoint: undefined;
 };
 
 type PointsScreenNavigationProp = StackNavigationProp<
@@ -39,6 +39,8 @@ const Home = () => {
   const [selectedUf, setSelectedUf] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
 
+  const [enableButton, setEnableButton] = useState(false);
+
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
@@ -63,11 +65,21 @@ const Home = () => {
       });
   }, [selectedUf]);
 
+  useEffect(() => {
+    if (selectedCity !== '') {
+      setEnableButton(true);
+    }
+  }, [selectedCity])
+
   function handleNavigateToPoints() {
     navigation.navigate('Points', {
       uf: selectedUf,
       city: selectedCity,
     });
+  }
+
+  function handleNavigateToCreatePointPage() {
+    navigation.navigate('CreatePoint');
   }
 
   return (
@@ -101,7 +113,7 @@ const Home = () => {
               marginBottom: 4,
               height: 60,
               alignItems: 'center',
-              backgroundColor: '#FFF'
+              backgroundColor: '#f1f1f1'
             }}
           />
 
@@ -117,15 +129,24 @@ const Home = () => {
                   marginBottom: 8,
                   height: 60,
                   alignItems: 'center',
-                  backgroundColor: '#FFF'
+                  backgroundColor: '#f1f1f1'
                 }}
               />
             </>
           )}
 
-          <RectButton style={styles.button} onPress={handleNavigateToPoints}>
+          <RectButton 
+            style={enableButton ? styles.button : styles.buttonDesablet} 
+            onPress={handleNavigateToPoints}
+            enabled={enableButton}
+          >
             <Text style={styles.buttonText}>
               Pesquisar
+            </Text>
+          </RectButton>
+          <RectButton style={styles.buttonCreatePoint} onPress={handleNavigateToCreatePointPage}>
+            <Text style={styles.buttonText}>
+              Cadastrar ponto de coleta
             </Text>
           </RectButton>
         </View>
@@ -137,19 +158,22 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 32,
-    backgroundColor: '#FFF',
+    padding: 32
   },
 
   main: {
     flex: 1,
     justifyContent: 'center',
+    marginBottom: 15,
   },
 
   logo: {
-    width: 200,
-    height: 200,
-    alignSelf: 'center',
+    width: 150,
+    height: 150,
+    alignSelf: 'flex-start',
+    marginBottom: -15,
+    marginTop: -50,
+    marginLeft: -15
   },
 
   title: {
@@ -175,7 +199,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto_400Regular',
     maxWidth: 260,
     lineHeight: 30,
-    backgroundColor: '#FFF'
+    backgroundColor: '#f1f1f1'
   },
 
   footer: {},
@@ -190,6 +214,27 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
     marginTop: 8,
+  },
+
+  buttonCreatePoint: {
+    backgroundColor: '#127e42',
+    height: 60,
+    flexDirection: 'row',
+    borderRadius: 10,
+    overflow: 'hidden',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+
+  buttonDesablet: {
+    backgroundColor: '#0ea754',
+    height: 60,
+    flexDirection: 'row',
+    borderRadius: 10,
+    overflow: 'hidden',
+    alignItems: 'center',
+    marginTop: 8,
+    opacity: 0.5
   },
 
   buttonIcon: {

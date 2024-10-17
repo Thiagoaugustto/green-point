@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Constants from 'expo-constants';
 import { Feather as Icon } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { SvgUri } from 'react-native-svg';
 import * as Location from 'expo-location';
@@ -123,11 +123,11 @@ const Points = () => {
           <Icon name="arrow-left" size={20} color="#34cb79" />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Bem vindo.</Text>
+        <Text style={styles.title}>Seja bem-vindo</Text>
         <Text style={styles.description}>Encontre no mapa um ponto de coleta.</Text>
 
         <View style={styles.mapContainer}>
-          { initialPosition[0] !== 0 && (
+          { initialPosition[0] !== 0 ? (
             <MapView 
               style={styles.map} 
               initialRegion={{
@@ -154,7 +154,11 @@ const Points = () => {
                 </Marker>
               )))}
             </MapView>
-          ) }
+          ) : (
+            <View style={styles.horizontal}>
+              <ActivityIndicator size="large" />
+            </View>
+          )}
         </View>
       </View>
       <View style={styles.itemsContainer}>
@@ -279,6 +283,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
   },
+
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
+    height: 450
+  }
 });
 
 export default Points;
