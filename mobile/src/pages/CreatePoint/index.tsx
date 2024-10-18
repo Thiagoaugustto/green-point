@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator, ChangeEvent } from "react-native";
+import { View, TextInput, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image } from "react-native";
 import { Feather as Icon } from '@expo/vector-icons';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +8,7 @@ import { SvgUri } from 'react-native-svg';
 import { FontAwesome } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MapView, { Marker } from 'react-native-maps';
+import * as ImagePicker from "expo-image-picker";
 import * as Location from 'expo-location';
 import api from "../../services/api";
 import axios from 'axios';
@@ -50,6 +51,9 @@ const CreatePoint = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+
+  const [file, setFile] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
@@ -139,16 +143,48 @@ const CreatePoint = () => {
     navigation.navigate('Home');
   }
 
+  async function pickImage() {
+    const { status } = await ImagePicker.
+
+    requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert("Sorry, we need camera roll permissions to make this work!");
+    } else {
+      const result = await ImagePicker.launchImageLibraryAsync();
+
+      if (!result.canceled && result.assets && result.assets.length > 0) { 
+        setFile(result.assets[0].uri);
+        setError(null);
+      }
+    }
+  }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           <TouchableOpacity onPress={handleNavigateBack}>
-            <Icon name="arrow-left" size={20} color="#34cb79" />
+            <Icon name="arrow-left" size={20} color="#0ea754" />
           </TouchableOpacity>
 
           <Text style={styles.title}>Cadastro de ponto de coleta</Text>
           <Text style={styles.description}>Preencha as informações abaixo para cadastrar um novo ponto de coleta.</Text>
+
+          <TouchableOpacity style={styles.buttonImage}
+              onPress={pickImage}>
+              <Text style={styles.buttonImageText}>
+                Escolha uma imagem
+              </Text>
+          </TouchableOpacity>
+
+          {file ? (
+            <View style={styles.imageContainer}>
+              <Image source={{ uri: file }} style={styles.image} />
+            </View>
+          ) : (
+            <Text style={styles.errorText}>{error}</Text>
+          )}
 
           <Text style={styles.label}>Nome do entidade</Text>
           <TextInput
@@ -295,6 +331,42 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontFamily: 'Roboto_400Regular',
     marginBottom: 24,
+  },
+
+  buttonImage: {
+    backgroundColor: "#0ea754",
+    height: 60,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+
+  buttonImageText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  imageContainer: {
+    borderRadius: 8,
+    marginBottom: 16,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+
+  image: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+  },
+
+  errorText: {
+    color: "red",
+    marginTop: 16,
   },
 
   input: {
