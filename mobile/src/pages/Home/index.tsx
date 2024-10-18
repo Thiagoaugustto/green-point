@@ -15,13 +15,10 @@ type RootStackParamList = {
   CreatePoint: undefined;
 };
 
-type PointsScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Points'
->;
+type ScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 type Props = {
-  navigation: PointsScreenNavigationProp;
+  navigation: ScreenNavigationProp;
 };
 
 interface IBGEUFResponse {
@@ -33,8 +30,8 @@ interface IBGECityResponse {
 }
 
 const Home = () => {
-  const [ufs, setUfs] = useState<string[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
+  const [ufs, setUfs] = useState<{ key: string, value: string }[]>([]);
+  const [cities, setCities] = useState<{ key: string, value: string }[]>([]);
 
   const [selectedUf, setSelectedUf] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
@@ -45,8 +42,11 @@ const Home = () => {
 
   useEffect(() => {
     axios.get<IBGEUFResponse[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados').then(response => {
-      const ufInitials = response.data.map(uf => uf.sigla);
-
+      const ufInitials = response.data.map(uf => ({
+        key: uf.sigla, 
+        value: uf.sigla
+      }));
+  
       setUfs(ufInitials);
     });
   }, []);
@@ -59,7 +59,10 @@ const Home = () => {
     axios
       .get<IBGECityResponse[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`)
       .then(response => {
-        const cityNames = response.data.map(city => city.nome);
+        const cityNames = response.data.map(city => ({
+          key: city.nome, 
+          value: city.nome
+        }));
 
         setCities(cityNames);
       });
@@ -107,7 +110,7 @@ const Home = () => {
           <SelectList 
             setSelected={setSelectedUf} 
             data={ufs} 
-            search={false}
+            search={true}
             arrowicon={<FontAwesome name="chevron-down" size={15} color={'#34CB79'} />}
             boxStyles={{
               marginBottom: 4,
@@ -123,7 +126,7 @@ const Home = () => {
               <SelectList 
                 setSelected={setSelectedCity} 
                 data={cities}
-                search={false}
+                search={true}
                 arrowicon={<FontAwesome name="chevron-down" size={15} color={'#34CB79'} />}
                 boxStyles={{
                   marginBottom: 8,
@@ -195,14 +198,14 @@ const styles = StyleSheet.create({
   label: {
     color: '#6C6C80',
     fontSize: 14,
-    marginTop: 8,
-    fontFamily: 'Roboto_400Regular',
-    maxWidth: 260,
-    lineHeight: 30,
-    backgroundColor: '#f1f1f1'
+    paddingBottom: 8,
+    paddingTop: 8,
+    fontFamily: 'Roboto_400Regular'
   },
 
-  footer: {},
+  footer: {
+    backgroundColor: '#f1f1f1'
+  },
 
   select: {},
 

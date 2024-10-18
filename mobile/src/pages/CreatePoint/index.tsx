@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
+import { View, TextInput, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator, ChangeEvent } from "react-native";
 import { Feather as Icon } from '@expo/vector-icons';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { useNavigation } from '@react-navigation/native';
 import { RectButton } from 'react-native-gesture-handler';
 import { SvgUri } from 'react-native-svg';
 import { FontAwesome } from '@expo/vector-icons';
+import { StackNavigationProp } from '@react-navigation/stack';
 import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 import api from "../../services/api";
 import axios from 'axios';
+
+type RootStackParamList = {
+  Home: undefined;
+  CreatePoint: undefined;
+};
+
+type ScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+
+type Props = {
+  navigation: ScreenNavigationProp;
+};
 
 interface Item {
   id: number;
@@ -28,11 +41,32 @@ const CreatePoint = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [ufs, setUfs] = useState<string[]>([]);
   const [cities, setCities] = useState<string[]>([]);
+  const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0]);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
   const [selectedUf, setSelectedUf] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
 
-  const navigation = useNavigation();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  useEffect(() => {
+    async function loadPosition() {
+      const location = await Location.getCurrentPositionAsync();
+
+      const { latitude, longitude } = location.coords;
+
+      setSelectedPosition([
+        latitude,
+        longitude
+      ])
+    }
+
+    loadPosition();
+  }, []);
 
   useEffect(() => {
     axios.get<IBGEUFResponse[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados').then(response => {
@@ -66,6 +100,45 @@ const CreatePoint = () => {
     navigation.goBack();
   }
 
+  function handleMapClick(event: any) {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+
+    setSelectedPosition([
+      latitude,
+      longitude,
+    ])
+  }
+
+  function handleSelectItem(id: number) {
+    const alreadySelected = selectedItems.findIndex(item => item === id);
+
+    if (alreadySelected >= 0) {
+      const filteredItems = selectedItems.filter(item => item !== id);
+
+      setSelectedItems(filteredItems);
+    } else {
+      setSelectedItems([ ...selectedItems, id ]);
+    }
+  }
+
+  function handleSubmitForm() {
+    const data = {
+      name,
+      email,
+      whatsapp,
+      uf: selectedUf,
+      city: selectedCity,
+      latitude: selectedPosition[0],
+      longitude: selectedPosition[1],
+      items: selectedItems
+    };
+
+    //api.post('points', data);
+    alert('Ponto de coleta cadastrado com sucesso!');
+
+    navigation.navigate('Home');
+  }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -77,31 +150,31 @@ const CreatePoint = () => {
           <Text style={styles.title}>Cadastro de ponto de coleta</Text>
           <Text style={styles.description}>Preencha as informações abaixo para cadastrar um novo ponto de coleta.</Text>
 
-          <Text style={styles.label}>Nome da entidade</Text>
+          <Text style={styles.label}>Nome do entidade</Text>
           <TextInput
+            id="name"
             style={styles.input}
-            value={''}
+            placeholder='Digite aqui o nome da entidade'
             autoCapitalize="characters"
-            autoCorrect={false}
-            onChangeText={() => {}}
+            onChangeText={setName}
           />
 
           <Text style={styles.label}>E-mail</Text>
           <TextInput
+            id="email"
             style={styles.input}
-            value={''}
+            placeholder="Digite aqui o e-mail"
             autoCapitalize="characters"
-            autoCorrect={false}
-            onChangeText={() => {}}
+            onChangeText={setEmail}
           />
 
           <Text style={styles.label}>Whatsapp</Text>
           <TextInput
+            id="whatsapp"
             style={styles.input}
-            value={''}
+            placeholder="Digite aqui o whatsapp"
             autoCapitalize="characters"
-            autoCorrect={false}
-            onChangeText={() => {}}
+            onChangeText={setWhatsapp}
           />
 
           <Text style={styles.label}>Estado</Text>
@@ -135,16 +208,31 @@ const CreatePoint = () => {
           <Text style={styles.label}>Selecione o endereço no mapa</Text>
 
           <View style={styles.mapContainer}>
-            <MapView 
-              style={styles.map} 
-              initialRegion={{
-                latitude: -7.0855285,
-                longitude: -34.8377519,
-                latitudeDelta: 0.014,
-                longitudeDelta: 0.014,
-              }}
-            >
-            </MapView>
+            {selectedPosition[0] !== 0 ? (
+              <MapView 
+                style={styles.map} 
+                initialRegion={{
+                  latitude: selectedPosition[0],
+                  longitude: selectedPosition[1],
+                  latitudeDelta: 0.014,
+                  longitudeDelta: 0.014,
+                }}
+                onPress={handleMapClick}
+              >
+                <Marker 
+                  style={styles.mapMarker}
+                  coordinate={{ 
+                    latitude: selectedPosition[0],
+                    longitude: selectedPosition[1], 
+                  }} 
+                >
+                </Marker>
+              </MapView>
+            ) : (
+              <View style={styles.horizontal}>
+                <ActivityIndicator size="large" />
+              </View>
+            )}
           </View>
 
           <Text style={styles.label}>Selecione um ou mais ítens abaixo</Text>
@@ -157,8 +245,11 @@ const CreatePoint = () => {
               {items.map(item => (
                 <TouchableOpacity 
                   key={String(item.id)} 
-                  style={styles.item} 
-                  onPress={() => {}}
+                  style={[
+                    styles.item, 
+                    selectedItems.includes(item.id) ? { borderColor: '#34CB79' } : {}
+                  ]} 
+                  onPress={() => handleSelectItem(item.id)}
                   activeOpacity={0.6}
                 >
                   <SvgUri width={42} height={42} uri={item.image_url} />
@@ -168,7 +259,7 @@ const CreatePoint = () => {
             </ScrollView>
           </View>
 
-          <RectButton style={styles.button} onPress={() => {}}>
+          <RectButton style={styles.button} onPress={handleSubmitForm}>
             <Text style={styles.buttonText}>
               Cadastrar
             </Text>
@@ -232,6 +323,11 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 
+  mapMarker: {
+    width: 90,
+    height: 80, 
+  },
+
   itemsContainer: {
     flexDirection: 'row',
     marginTop: 16,
@@ -286,6 +382,13 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontFamily: 'Roboto_500Medium',
     fontSize: 16,
+  },
+
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
+    height: 250
   }
 });
 

@@ -15,13 +15,10 @@ type RootStackParamList = {
   };
 };
 
-type PointsScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Detail'
->;
+type ScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 type Props = {
-  navigation: PointsScreenNavigationProp;
+  navigation: ScreenNavigationProp;
 };
 
 interface Item {
