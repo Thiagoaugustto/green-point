@@ -40,8 +40,8 @@ interface IBGECityResponse {
 
 const CreatePoint = () => {
   const [items, setItems] = useState<Item[]>([]);
-  const [ufs, setUfs] = useState<string[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
+  const [ufs, setUfs] = useState<{ key: string, value: string }[]>([]);
+  const [cities, setCities] = useState<{ key: string, value: string }[]>([]);
   const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0]);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
@@ -53,7 +53,6 @@ const CreatePoint = () => {
   const [whatsapp, setWhatsapp] = useState('');
 
   const [file, setFile] = useState<string | null>(null);
-  const [error, setError] = useState(null);
 
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
@@ -74,8 +73,11 @@ const CreatePoint = () => {
 
   useEffect(() => {
     axios.get<IBGEUFResponse[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados').then(response => {
-      const ufInitials = response.data.map(uf => uf.sigla);
-
+      const ufInitials = response.data.map(uf => ({
+        key: uf.sigla, 
+        value: uf.sigla
+      }));
+  
       setUfs(ufInitials);
     });
   }, []);
@@ -94,7 +96,10 @@ const CreatePoint = () => {
     axios
       .get<IBGECityResponse[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`)
       .then(response => {
-        const cityNames = response.data.map(city => city.nome);
+        const cityNames = response.data.map(city => ({
+          key: city.nome, 
+          value: city.nome
+        }));
 
         setCities(cityNames);
       });
@@ -132,12 +137,14 @@ const CreatePoint = () => {
       whatsapp,
       uf: selectedUf,
       city: selectedCity,
-      latitude: selectedPosition[0],
-      longitude: selectedPosition[1],
-      items: selectedItems
+      latitude: String(selectedPosition[0]),
+      longitude: String(selectedPosition[1]),
+      items: selectedItems.join(','),
+      image: file
     };
 
-    //api.post('points', data);
+    api.post('points', data);
+
     alert('Ponto de coleta cadastrado com sucesso!');
 
     navigation.navigate('Home');
@@ -155,7 +162,6 @@ const CreatePoint = () => {
 
       if (!result.canceled && result.assets && result.assets.length > 0) { 
         setFile(result.assets[0].uri);
-        setError(null);
       }
     }
   }
@@ -178,12 +184,10 @@ const CreatePoint = () => {
               </Text>
           </TouchableOpacity>
 
-          {file ? (
+          {file && (
             <View style={styles.imageContainer}>
               <Image source={{ uri: file }} style={styles.image} />
             </View>
-          ) : (
-            <Text style={styles.errorText}>{error}</Text>
           )}
 
           <Text style={styles.label}>Nome do entidade</Text>
@@ -191,7 +195,6 @@ const CreatePoint = () => {
             id="name"
             style={styles.input}
             placeholder='Digite aqui o nome da entidade'
-            autoCapitalize="characters"
             onChangeText={setName}
           />
 
@@ -200,7 +203,6 @@ const CreatePoint = () => {
             id="email"
             style={styles.input}
             placeholder="Digite aqui o e-mail"
-            autoCapitalize="characters"
             onChangeText={setEmail}
           />
 
@@ -209,7 +211,6 @@ const CreatePoint = () => {
             id="whatsapp"
             style={styles.input}
             placeholder="Digite aqui o whatsapp"
-            autoCapitalize="characters"
             onChangeText={setWhatsapp}
           />
 
@@ -217,7 +218,7 @@ const CreatePoint = () => {
           <SelectList 
             setSelected={setSelectedUf} 
             data={ufs} 
-            search={false}
+            search={true}
             arrowicon={<FontAwesome name="chevron-down" size={15} color={'#34CB79'} />}
             boxStyles={{
               marginBottom: 4,
@@ -231,7 +232,7 @@ const CreatePoint = () => {
           <SelectList 
             setSelected={setSelectedCity} 
             data={cities}
-            search={false}
+            search={true}
             arrowicon={<FontAwesome name="chevron-down" size={15} color={'#34CB79'} />}
             boxStyles={{
               marginBottom: 8,
@@ -362,11 +363,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     borderRadius: 8,
-  },
-
-  errorText: {
-    color: "red",
-    marginTop: 16,
   },
 
   input: {
