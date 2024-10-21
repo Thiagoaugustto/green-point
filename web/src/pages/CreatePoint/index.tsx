@@ -10,7 +10,7 @@ import Dropzone from '../../components/Dropzone';
 
 import './styles.css';
 
-import logo from '../../assets/logo.svg';
+import logo from '../../assets/logo.png';
 
 // array ou objeto: manualmente informar o tipo da variavel
 
@@ -156,7 +156,7 @@ const CreatePoint = () => {
   return (
     <div id="page-create-point">
       <header>
-        <img src={logo} alt="Ecoleta" />
+        <img className="logo" src={logo} alt="Ecoleta" />
 
         <Link to="/">
           <FiArrowLeft />

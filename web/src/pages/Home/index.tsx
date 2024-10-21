@@ -1,27 +1,23 @@
 import React from 'react';
-import { FiLogIn } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
 import './styles.css';
 
-import logo from '../../assets/logo.svg';
+import logo from '../../assets/logo.png';
 
 const Home = () => {
   return (
     <div id="page-home">
       <div className="content">
         <header>
-          <img src={logo} alt="Ecoleta" />
+          <img className="logo" src={logo} alt="Green Point" />
         </header>
 
         <main>
-          <h1>Seu marketplace de coleta de resíduos.</h1>
-          <p>Ajudamos pessoas a encontrarem pontos de coleta de forma eficiente.</p>
+          <h1>Seu guia para coleta de resíduos sustentável.</h1>
+          <p>Conectamos pessoas a soluções de coleta de resíduos de forma rápida e simples.</p>
 
           <Link to="/create-point">
-            <span>
-              <FiLogIn />
-            </span>
             <strong>Cadastre um ponto de coleta</strong>
           </Link>
         </main>

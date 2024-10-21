@@ -13,6 +13,10 @@
   align-items: center;
 }
 
+#page-create-point .logo {
+  width: 200px;
+}
+
 #page-create-point header a {
   color: var(--title-color);
   font-weight: bold;
@@ -148,7 +152,7 @@
 #page-create-point form button {
   width: 260px;
   height: 56px;
-  background: var(--primary-color);
+  background: #27a728;
   border-radius: 8px;
   color: #FFF;
   font-weight: bold;
@@ -161,7 +165,7 @@
 }
 
 #page-create-point form button:hover {
-  background: #2FB86E;
+  background: #00560fd9;
 }
 
 .items-grid {

@@ -1,7 +1,8 @@
 #page-home {
   height: 100vh;
 
-  background: url('../../assets/home-background.svg') no-repeat 700px bottom;
+  background: url(/static/media/home-background.a2d398cd.png) 1050px 200px no-repeat;
+  background-size: 700px;
 }
 
 #page-home .content {
@@ -14,6 +15,10 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+
+#page-home .logo {
+  width: 200px;
 }
 
 #page-home .content header {
@@ -44,7 +49,7 @@
   width: 100%;
   max-width: 360px;
   height: 72px;
-  background: var(--primary-color);
+  background: #27a728;
   border-radius: 8px;
   text-decoration: none;
 
@@ -80,7 +85,7 @@
 }
 
 #page-home .content main a:hover {
-  background: #2FB86E;
+  background: #00560fd9;
 }
 
 @media(max-width: 900px) {
