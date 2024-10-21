@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img alt="Green Point" title="Ecoleta" src=".github/logo.png" width="220px" />
+    <img alt="Green Point" title="Ecoleta" src=".github/logo.png" width="180px" />
 </h1>
 
 <p align="center">
